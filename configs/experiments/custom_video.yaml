@@ -21,3 +21,5 @@ classes:
 reporting:
   video:
     enabled: true
+event_trigger:
+  thresholds: [0.45]

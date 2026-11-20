@@ -31,6 +31,20 @@
       "cwd": "${workspaceFolder}", "console": "integratedTerminal", "justMyCode": true
     },
     {
+      "name": "LIVE: baseline vs event-triggered (video)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/live_demo.py",
+      "args": ["--source", "data/videos/car-detection.mp4"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "LIVE: webcam",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/live_demo.py",
+      "args": ["--source", "0"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
       "name": "Regenerate report (latest run)",
       "type": "debugpy", "request": "launch",
       "program": "${workspaceFolder}/scripts/generate_report.py",
