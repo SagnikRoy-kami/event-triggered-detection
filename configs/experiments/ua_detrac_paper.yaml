@@ -1,0 +1,16 @@
+# Full paper experiment: the whole UA-DETRAC test split (40 sequences, ~56k frames).
+# Every threshold is really executed so FPS / latency are measured, not estimated.
+# Use a GPU if you can; on CPU this takes many hours.
+# For a faster sweep (same accuracy numbers, estimated timings) add:
+#   --set evaluation.timing_mode=replay
+experiment:
+  name: ua_detrac_paper
+dataset:
+  type: ua_detrac
+  split: test
+event_trigger:
+  thresholds: auto
+reporting:
+  timeline_sequences: 3
+  video:
+    enabled: true

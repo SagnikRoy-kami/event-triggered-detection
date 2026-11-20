@@ -1,0 +1,24 @@
+# Core ----------------------------------------------------------------------
+# PyTorch: for an NVIDIA GPU install the CUDA build FIRST from https://pytorch.org
+# (e.g. pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124),
+# otherwise the line below installs the CPU build.
+torch>=2.1
+torchvision>=0.16
+ultralytics>=8.3          # YOLOv8 / YOLO11 detectors
+opencv-python>=4.8
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+pyyaml>=6.0
+jinja2>=3.1
+tqdm>=4.65
+psutil>=5.9               # CPU / RAM monitoring
+
+# Data download -------------------------------------------------------------
+kaggle>=1.6
+
+# Development ---------------------------------------------------------------
+pytest>=7.4
+
+# Optional ------------------------------------------------------------------
+# nvidia-ml-py>=12.0      # GPU utilisation % in the report (NVIDIA only)

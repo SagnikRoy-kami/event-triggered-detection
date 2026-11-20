@@ -1,0 +1,48 @@
+{
+  // Terminal > Run Task...
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup: create virtual environment",
+      "type": "shell",
+      "windows": { "command": "py -3 -m venv .venv" },
+      "linux": { "command": "python3 -m venv .venv" },
+      "osx": { "command": "python3 -m venv .venv" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup: install requirements",
+      "type": "shell",
+      "windows": { "command": ".venv\\Scripts\\python -m pip install --upgrade pip; .venv\\Scripts\\python -m pip install -r requirements.txt; .venv\\Scripts\\python -m pip install -e ." },
+      "linux": { "command": ".venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -r requirements.txt && .venv/bin/python -m pip install -e ." },
+      "osx": { "command": ".venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -r requirements.txt && .venv/bin/python -m pip install -e ." },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} -m pytest tests",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run: smoke test",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} scripts/run_experiment.py --config configs/experiments/synthetic_smoke.yaml",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run: UA-DETRAC quick",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} scripts/run_experiment.py --config configs/experiments/ua_detrac_quick.yaml",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Report: regenerate latest",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} scripts/generate_report.py",
+      "problemMatcher": []
+    }
+  ]
+}

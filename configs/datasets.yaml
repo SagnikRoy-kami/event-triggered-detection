@@ -1,0 +1,25 @@
+# Where each dataset comes from and where it is stored.
+# scripts/download_data.py reads this file - add an entry to support a new source.
+
+ua-detrac:
+  description: >
+    UA-DETRAC (Wen et al., CVIU 2020): 100 fixed-camera traffic sequences, 25 fps,
+    960x540, ~140k frames, vehicle boxes (car / van / bus / others) + ignored regions.
+    60 train / 40 test sequences. Named by the paper (Sec. IV-B).
+  source: kaggle
+  kaggle_handle: bratjay/ua-detrac-orig       # https://www.kaggle.com/datasets/bratjay/ua-detrac-orig
+  approx_size: 11.5 GB (zip) + same again while extracting
+  dest: data/raw/ua-detrac
+  config_type: ua_detrac
+
+sample-videos:
+  description: >
+    Two short public fixed-camera clips (Intel IoT DevKit sample videos, CC BY 4.0)
+    for a quick end-to-end check without annotations (reference = baseline).
+  source: http
+  files:
+    - https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/car-detection.mp4
+    - https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/person-bicycle-car-detection.mp4
+  approx_size: 10 MB
+  dest: data/videos
+  config_type: video

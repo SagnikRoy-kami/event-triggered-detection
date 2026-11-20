@@ -1,0 +1,13 @@
+# Quick UA-DETRAC run: a handful of test sequences, capped length.
+# Good for checking everything works on a laptop CPU (roughly 10-30 min).
+#   python scripts/run_experiment.py --config configs/experiments/ua_detrac_quick.yaml
+experiment:
+  name: ua_detrac_quick
+dataset:
+  type: ua_detrac
+  split: test
+  max_sequences: 4
+  max_frames_per_sequence: 600
+reporting:
+  video:
+    enabled: true

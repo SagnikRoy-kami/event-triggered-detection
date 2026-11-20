@@ -1,0 +1,66 @@
+{
+  // Run & Debug panel (Ctrl+Shift+D): pick a configuration and press F5.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "1. Smoke test (synthetic, no downloads)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_experiment.py",
+      "args": ["--config", "configs/experiments/synthetic_smoke.yaml"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal", "justMyCode": true
+    },
+    {
+      "name": "2. Sample videos (no annotations)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_experiment.py",
+      "args": ["--config", "configs/experiments/custom_video.yaml"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal", "justMyCode": true
+    },
+    {
+      "name": "3. UA-DETRAC quick (4 test sequences)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_experiment.py",
+      "args": ["--config", "configs/experiments/ua_detrac_quick.yaml"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal", "justMyCode": true
+    },
+    {
+      "name": "4. UA-DETRAC full paper experiment",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_experiment.py",
+      "args": ["--config", "configs/experiments/ua_detrac_paper.yaml"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal", "justMyCode": true
+    },
+    {
+      "name": "Regenerate report (latest run)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/generate_report.py",
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "Download sample videos",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/download_data.py",
+      "args": ["--dataset", "sample-videos"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "Download UA-DETRAC (Kaggle, ~11.5 GB)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/download_data.py",
+      "args": ["--dataset", "ua-detrac"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "Prepare UA-DETRAC (index + previews)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/prepare_data.py",
+      "args": ["--preview", "6"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug current script",
+      "type": "debugpy", "request": "launch",
+      "program": "${file}", "cwd": "${workspaceFolder}", "console": "integratedTerminal", "justMyCode": false
+    }
+  ]
+}

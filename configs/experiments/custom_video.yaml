@@ -1,0 +1,23 @@
+# Your own traffic videos (no annotations): drop .mp4 files into data/videos/.
+# Without ground truth, the event-triggered output is scored against the
+# frame-by-frame baseline output (reference = baseline), which measures exactly
+# how much accuracy the skipping costs.
+experiment:
+  name: custom_video
+dataset:
+  type: video
+  video_paths: []          # empty = every video in data/videos/
+evaluation:
+  reference: baseline
+classes:
+  eval_classes: [person, bicycle, car, motorcycle, bus, truck]
+  detector_to_eval:
+    person: person
+    bicycle: bicycle
+    car: car
+    motorcycle: motorcycle
+    bus: bus
+    truck: truck
+reporting:
+  video:
+    enabled: true

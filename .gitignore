@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Large / generated content (folders are kept via .gitkeep)
+data/raw/*
+data/interim/*
+data/processed/*
+data/videos/*
+models/weights/*
+models/finetuned/*
+outputs/runs/*
+outputs/training/*
+outputs/dataset_preview/
+!**/.gitkeep
+!data/README.md
+
+# Secrets
+kaggle.json
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*.log

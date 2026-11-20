@@ -1,0 +1,142 @@
+# =============================================================================
+#  DEFAULT CONFIGURATION  -  Event-Triggered Object Detection
+# =============================================================================
+#  Every key the code understands lives in this file. Experiment files in
+#  configs/experiments/ only override what they need, and command-line
+#  `--set key=value` overrides win over both:
+#
+#     default.yaml  <  experiments/<name>.yaml  <  --set a.b=c
+#
+#  An unknown key (e.g. a typo) raises an error instead of being ignored.
+#  To add a new option: add it here with a default, then read it in the code.
+#  All relative paths are resolved from the project root.
+# =============================================================================
+
+experiment:
+  name: default                 # used in the run-folder name
+  seed: 42
+  output_root: outputs/runs     # every run gets outputs/runs/<timestamp>_<name>/
+  notes: ""                     # free text, copied into the report
+
+# -----------------------------------------------------------------------------
+# Dataset  (paper Sec. III-B and IV-B)
+# -----------------------------------------------------------------------------
+dataset:
+  # ua_detrac    : UA-DETRAC image sequences + XML ground truth (recommended by the paper)
+  # video        : any .mp4/.avi files (no ground truth -> reference = baseline)
+  # image_folder : folders of ordered frames, optional YOLO-format .txt labels
+  # synthetic    : generated moving-box scenes with exact ground truth (tests / smoke runs)
+  type: ua_detrac
+  root: data/raw/ua-detrac      # where the Kaggle download was extracted
+  index_file: data/processed/ua_detrac/index.json   # built by scripts/prepare_data.py (optional, speeds up loading)
+  split: test                   # paper: "the testing segment of the dataset is utilized"
+  sequences: []                 # explicit list, e.g. [MVI_39031, MVI_40701]; empty = all in split
+  max_sequences: null           # cap the number of sequences (null = no cap)
+  max_frames_per_sequence: null # cap frames per sequence (null = whole sequence)
+  frame_stride: 1               # 1 = every frame (keep 1 to stay faithful to the paper)
+  apply_ignore_regions: true    # UA-DETRAC protocol: discard detections inside ignored regions
+
+  # type: video
+  video_paths: []               # files or folders; empty = everything in data/videos/
+
+  # type: image_folder
+  image_folder:
+    sequences_dir: data/processed/my_sequences   # one sub-folder per sequence
+    labels_subdir: labels                        # <seq>/labels/<frame>.txt (YOLO format), optional
+    images_subdir: images                        # <seq>/images/<frame>.jpg  (or frames directly in <seq>/)
+    class_names: [car, bus, truck]               # index -> name for the YOLO label files
+    fps: 25
+
+  # type: synthetic
+  synthetic:
+    num_sequences: 2
+    frames_per_sequence: 150
+    width: 640
+    height: 360
+    max_objects: 4
+    activity_pattern: [low, high, idle, moderate]   # cycles through the sequence (paper IV-A: low/moderate/high activity)
+
+# -----------------------------------------------------------------------------
+# Class mapping  -  everything is evaluated in one shared label space
+# -----------------------------------------------------------------------------
+classes:
+  eval_classes: [car, bus, truck]
+  # dataset label  -> evaluation label (labels not listed are dropped)
+  dataset_to_eval:
+    car: car
+    van: car
+    bus: bus
+    others: truck
+    truck: truck
+  # detector (COCO) label -> evaluation label (labels not listed are discarded)
+  detector_to_eval:
+    car: car
+    bus: bus
+    truck: truck
+
+# -----------------------------------------------------------------------------
+# Object detector  -  identical for baseline and proposed method (paper III-D)
+# -----------------------------------------------------------------------------
+detector:
+  backend: ultralytics          # ultralytics | contour (tiny classical detector, used for synthetic data/tests)
+  weights: yolov8n.pt           # any Ultralytics model: yolov8s.pt, yolo11n.pt, or a fine-tuned models/finetuned/.../best.pt
+  weights_dir: models/weights   # downloaded weights are cached here
+  imgsz: 640                    # paper III-B: frames resized to the detector's input resolution
+  conf: 0.25                    # confidence threshold (same for both methods)
+  iou: 0.45                     # NMS IoU
+  max_det: 300
+  device: auto                  # auto | cpu | cuda:0 | mps
+  half: false                   # FP16 (CUDA only)
+  warmup_iters: 3               # untimed warm-up passes before every run
+
+# -----------------------------------------------------------------------------
+# Event trigger  (paper Sec. III-C and IV-D, Eq. 1/3 and Eq. 4)
+# -----------------------------------------------------------------------------
+event_trigger:
+  method: temporal_difference   # registered triggers: temporal_difference | always
+  # Thresholds tau to sweep. Either a list of numbers, or `auto`, which takes
+  # the percentiles below of the measured D_t distribution of the data.
+  thresholds: auto
+  auto_percentiles: [10, 25, 40, 50, 60, 75, 90]
+  # D_t = (1/N) * sum_i |I_t(i) - I_{t-1}(i)| is computed on:
+  grayscale: true               # single-channel intensity (0-255)
+  resize_width: 320             # downscale before differencing (null = full resolution); reduces cost, keeps D_t's meaning
+  blur_kernel: 0                # odd Gaussian kernel to suppress sensor noise; 0 = off (paper: raw differences)
+  mask_ignore_regions: false    # exclude UA-DETRAC ignored regions from D_t
+  # ---- Paper-faithful defaults below. Change only for extension studies. ----
+  reference: previous           # previous = I_{t-1} (paper Eq. 1) | last_detected = frame the detector last ran on
+  max_skip: null                # force a detection after this many consecutive skips (null = never, as in the paper)
+  first_frame_always_detect: true   # no I_{t-1} exists for the first frame
+
+# -----------------------------------------------------------------------------
+# Evaluation  (paper Sec. III-E and IV-E)
+# -----------------------------------------------------------------------------
+evaluation:
+  # ground_truth : compare with dataset annotations (requires labelled data)
+  # baseline     : compare with the frame-by-frame detector's output (works on any video)
+  reference: ground_truth
+  iou_thresholds: [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+  pr_iou: 0.5                   # IoU used for precision / recall / F1 / accuracy
+  min_gt_area: 0                # ignore ground-truth boxes smaller than this (pixels^2)
+  per_sequence: true            # also compute metrics for every sequence
+  accuracy_drop_tolerance: 1.0  # largest acceptable mAP@0.5 drop (percentage points) when recommending tau
+  monitor_resources: true       # sample CPU / RAM / GPU while each method runs
+  resource_sample_interval: 0.25
+  timing_mode: measured         # measured = really run every tau | replay = reuse cached baseline detections (fast sweep; timings estimated from measured per-call latency)
+
+# -----------------------------------------------------------------------------
+# Reporting  (automatic after every run)
+# -----------------------------------------------------------------------------
+reporting:
+  formats: [html, markdown, latex]
+  figure_formats: [png, pdf]    # pdf versions drop straight into Overleaf
+  dpi: 160
+  save_per_frame_log: true      # per-frame D_t, trigger decision, latencies (CSV)
+  save_predictions: true        # all boxes for every method (compressed .npz)
+  timeline_sequences: 2         # how many sequences get a D_t / trigger timeline figure
+  video:
+    enabled: false              # side-by-side baseline vs event-triggered video
+    sequence: null              # null = first evaluated sequence
+    threshold: null             # null = recommended tau
+    max_frames: 500
+    fps: null                   # null = source fps

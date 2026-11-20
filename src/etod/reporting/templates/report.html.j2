@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+  :root { --surface:#fcfcfb; --page:#f9f9f7; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8984; --line:#e6e5e0;
+          --blue:#2a78d6; --orange:#eb6834; --hl:#eef4fc; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 32px 24px 64px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 28px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 19px; margin: 40px 0 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 15px; margin: 22px 0 6px; }
+  .sub { color: var(--ink2); font-size: 14px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .chip { background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:3px 11px; font-size:12.5px; color:var(--ink2); }
+  .kpis { display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:12px; margin: 18px 0 8px; }
+  .kpi { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .kpi .v { font-size: 26px; font-weight: 650; letter-spacing:-0.02em; }
+  .kpi .l { font-size: 12.5px; color: var(--ink2); }
+  .kpi .d { font-size: 12.5px; color: var(--muted); }
+  ul.findings li { margin: 6px 0; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; margin: 14px 0; }
+  .tbl { overflow-x:auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--ink2); font-weight: 600; background: var(--surface); position: sticky; top: 0; }
+  tr.hl td { background: var(--hl); font-weight: 600; }
+  figure { margin: 0; }
+  figure img { width: 100%; height: auto; border-radius: 6px; }
+  figcaption { font-size: 13px; color: var(--ink2); margin-top: 6px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+  code, pre { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 12.5px; }
+  pre { background: #f2f1ed; padding: 12px; border-radius: 8px; overflow:auto; max-height: 420px; }
+  details summary { cursor: pointer; color: var(--blue); font-weight: 600; }
+  .muted { color: var(--muted); }
+  footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>{{ title }}</h1>
+  <div class="sub">Adaptive event-triggered object detection: the detector runs only when the temporal change D<sub>t</sub> exceeds τ.</div>
+  <div class="chips">
+    <span class="chip">Run: {{ info.run_dir.split('/')[-1].split('\\')[-1] }}</span>
+    <span class="chip">{{ info.environment.timestamp }}</span>
+    <span class="chip">Detector: {{ detector.name }}</span>
+    <span class="chip">Device: {{ detector.device }}</span>
+    <span class="chip">{{ info.dataset.num_sequences }} sequences · {{ "{:,}".format(info.dataset.num_frames) }} frames</span>
+    <span class="chip">Reference: {{ info.reference }}</span>
+    <span class="chip">Timing: {{ info.timing_mode }}</span>
+  </div>
+  {% if notes %}<p class="sub">{{ notes }}</p>{% endif %}
+</header>
+
+{% set hi = main.highlight.index(True) if True in main.highlight else none %}
+{% if hi is not none %}
+<div class="kpis">
+  <div class="kpi"><div class="l">Recommended threshold</div><div class="v">τ = {{ info.recommendation.threshold }}</div><div class="d">{{ info.recommendation.criterion }}</div></div>
+  <div class="kpi"><div class="l">Frames skipped (S, Eq. 2)</div><div class="v">{{ main.rows[hi][9] }}%</div><div class="d">detector invoked on {{ main.rows[hi][8] }}% of frames</div></div>
+  <div class="kpi"><div class="l">Throughput</div><div class="v">{{ main.rows[hi][6] }} FPS</div><div class="d">baseline {{ main.rows[0][6] }} FPS · {{ main.rows[hi][11] }}</div></div>
+  <div class="kpi"><div class="l">mAP@0.5</div><div class="v">{{ main.rows[hi][1] }}%</div><div class="d">baseline {{ main.rows[0][1] }}% · Δ {{ main.rows[hi][10] }} pp</div></div>
+</div>
+{% endif %}
+
+<h2>Key findings</h2>
+<ul class="findings">{% for f in findings %}<li>{{ f }}</li>{% endfor %}</ul>
+
+<h2>Results: baseline vs event-triggered</h2>
+<div class="card tbl">
+<table>
+  <thead><tr>{% for h in main.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for r in main.rows %}<tr class="{{ 'hl' if main.highlight[loop.index0] else '' }}">{% for c in r %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+</table>
+<p class="muted" style="margin:10px 0 0;font-size:12.5px">Highlighted row = recommended τ. Accuracy uses every frame; on skipped frames the previous detection result is reused (paper Fig. 1). Latency/FPS = event module + detector time per frame (frame decoding excluded, identical for all methods). Tables for LaTeX: <code>tables/results.tex</code>, <code>tables/table1_proposed_row.tex</code>.</p>
+</div>
+
+<h2>Figures</h2>
+{% for f in figures %}
+<div class="card"><figure><h3>{{ f.title }}</h3><img src="{{ f.src }}" alt="{{ f.title }}"><figcaption>{{ f.caption }} <span class="muted">(figures/{{ f.name }}.png / .pdf)</span></figcaption></figure></div>
+{% endfor %}
+
+{% if preview %}
+<h2>Comparison video</h2>
+<div class="card"><figure><img src="{{ preview }}" alt="video frame"><figcaption>Frame from the side-by-side video. Full video(s) in <code>videos/</code>: {% for v in videos %}<code>{{ v }}</code> {% endfor %}</figcaption></figure></div>
+{% endif %}
+
+{% if class_tbl.rows %}
+<h2>Per-class results</h2>
+<div class="card tbl"><table><thead><tr>{% for h in class_tbl.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>{% for r in class_tbl.rows %}<tr>{% for c in r %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+{% endif %}
+
+{% if act_tbl.rows %}
+<h2>Detector usage by scene activity</h2>
+<p class="sub">Frames grouped by D<sub>t</sub> terciles of the dataset (thresholds {{ '%.3f'|format(info.activity_bins[0]) }} and {{ '%.3f'|format(info.activity_bins[1]) }}).</p>
+<div class="card tbl"><table><thead><tr>{% for h in act_tbl.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>{% for r in act_tbl.rows %}<tr>{% for c in r %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+{% endif %}
+
+{% if seq_tbl.rows %}
+<h2>Per-sequence results (recommended τ)</h2>
+<details><summary>Show {{ seq_tbl.rows|length }} sequences</summary>
+<div class="card tbl"><table><thead><tr>{% for h in seq_tbl.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>{% for r in seq_tbl.rows %}<tr>{% for c in r %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+</details>
+{% endif %}
+
+<h2>Paper → code mapping</h2>
+<div class="card tbl"><table><thead><tr><th>Paper element</th><th style="text-align:left">Implementation</th></tr></thead>
+<tbody>{% for a, b in mapping %}<tr><td>{{ a }}</td><td style="text-align:left"><code>{{ b }}</code></td></tr>{% endfor %}</tbody></table></div>
+
+<h2>Experimental setup</h2>
+<div class="grid2">
+<div class="card">
+<h3 style="margin-top:0">Detector</h3>
+<table><tbody>{% for k, v in detector.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</tbody></table>
+<h3>Thresholds evaluated</h3><p>τ ∈ {{ info.thresholds }}</p>
+<h3>Phase durations (s)</h3>
+<table><tbody>{% for k, v in phases.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</tbody></table>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Environment</h3>
+<table><tbody>{% for k, v in env.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</tbody></table>
+</div>
+</div>
+<details><summary>Full configuration used for this run</summary><pre>{{ config_yaml }}</pre></details>
+
+<footer>Generated automatically by <code>etod.reporting</code>. Rebuild with <code>python scripts/generate_report.py --run &lt;run folder&gt;</code>.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Smoke test: no downloads, no GPU, no YOLO. Generated scenes with exact
+# ground truth + a tiny classical detector. Runs in seconds and exercises
+# the full pipeline (loading -> trigger -> detection -> metrics -> report).
+experiment:
+  name: synthetic_smoke
+dataset:
+  type: synthetic
+classes:
+  eval_classes: [car, bus, truck]
+  dataset_to_eval: {car: car, bus: bus, truck: truck}
+  detector_to_eval: {car: car, bus: bus, truck: truck}
+detector:
+  backend: contour
+  warmup_iters: 1
+event_trigger:
+  resize_width: null
+evaluation:
+  resource_sample_interval: 0.1
+reporting:
+  figure_formats: [png]
+  video:
+    enabled: true
+    max_frames: 150
